@@ -18,6 +18,7 @@ using System.Configuration;
 using System.Collections;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
 
 namespace WpfApp1
 {
@@ -34,14 +35,7 @@ namespace WpfApp1
 		{
 
 			InitializeComponent();
-			string conectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
-
-			string conectionString_Edifecs = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.gbdrepoConnectionString_Edifecs"].ConnectionString;
-
-		
-
-		sqlConnection = new SqlConnection(conectionString);
-			sqlConnection_Edifecs = new SqlConnection(conectionString_Edifecs);
+			
 
 
 
@@ -52,8 +46,10 @@ namespace WpfApp1
 
 		private void SearchButton_Click(object sender, RoutedEventArgs e)
 		{
+	
+			string conectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
 
-
+			sqlConnection = new SqlConnection(conectionString);
 
 			MessageBoxLbl.Content = "In progress............";
 			sqlConnection.Open();
@@ -78,7 +74,7 @@ namespace WpfApp1
 						while (reader_Eids.Read())
 						{
 
-							CSVLoad.Add(reader_Eids.GetString(0));
+							CSVLoad.Add(reader_Eids.GetString(0) + ".DAT");
 
 						}
 
@@ -87,8 +83,8 @@ namespace WpfApp1
 
 
 					}
-			
-					
+
+				sqlConnection.Close();
 				if (CSVLoad.Count.Equals(0))
 				{
 					MessageBox.Show("CSV files not found.Check batchlog ID");
@@ -118,21 +114,30 @@ namespace WpfApp1
 
 		}
 
-		private void LoadCSV_click(object sender, RoutedEventArgs e)
+		private void CSVStage_click(object sender, RoutedEventArgs e)
 		{
 
 
 			Process.Start(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
-
+			LoadCSVFilesBTN.IsEnabled = true;
 		}
 
 
 
 		public void CsvFileValidation_ectracts( List<string> file)
 		{
+
 			
+
+
+
 			try
 			{
+				string conectionString_Edifecs = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.gbdrepoConnectionString_Edifecs"].ConnectionString;
+
+
+				sqlConnection_Edifecs = new SqlConnection(conectionString_Edifecs);
+
 				sqlConnection_Edifecs.Open();
 				using (sqlConnection_Edifecs)
 				{
@@ -172,24 +177,29 @@ namespace WpfApp1
 						if (file.Contains(reader.GetString(0)))
 						{
 
-
-
 							file.Remove(reader.GetString(0));
+				
+
 						}
-
-
+						List<string> DupFiles = new List<string> ();
+						DupFiles.Add(reader.GetString(0));
+						CsvValidationLB.ItemsSource = DupFiles;
 					}
 					if (file.Count > 0)
 					{
+
+						csvListBox.ItemsSource = file;
 						Movefile(file);
 
 					}
 					else
 					{
-						///write somthing for the user. 
+						MessageBox.Show("All Files were perviously loaded.");
+
 					}
 
 				}
+				sqlConnection_Edifecs.Close();
 			}
 
 			catch (Exception ex)
@@ -205,20 +215,28 @@ namespace WpfApp1
 
 			MessageBoxLbl.Content = FileNames[0];
 
+			foreach (string file in FileNames)
+			{
 
+				//Change to the correct enviorment
+				string FileToCopy = @"\\va01pstodfs003\Apps\eids_nonprod\FileTransfers\DEV\Archive\" + file ;
+				String Destination = @"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\" +file;
+				System.IO.File.Copy(FileToCopy, Destination);
 
-
-			//DefaultSetting();
+			}
+			DefaultSetting();
 
 		}
 
 		public void DefaultSetting()
 		{
 			LoadCSVBTN.IsEnabled = false;
+			LoadCSVFilesBTN.IsEnabled = false;
+
 			SearchBtn.IsEnabled = true;
-			//MessageBoxLbl.Content = "Ready for next batch 1";
-			sqlConnection.Close();
-			sqlConnection_Edifecs.Close();
+
+			MessageBoxLbl.Content = "Ready for next batch 1";
+			
 		}
 
 		private void LoadCSVcheckBox_Checked(object sender, RoutedEventArgs e)
@@ -234,10 +252,23 @@ namespace WpfApp1
 		{
 			LoadCSVBTN.IsEnabled = false;
 			SearchBtn.IsEnabled = true;
+			LoadCSVFilesBTN.IsEnabled = false;
 
 
 		}
-		
+
+		private void LoadCSVFilesBTN_Click(object sender, RoutedEventArgs e)
+		{
+
+			//Change to the correct eviroment 
+			DirectoryInfo d = new DirectoryInfo(@"D:\Test");
+			FileInfo[] Files = d.GetFiles("*.DAT"); 
+			string str = "";
+			foreach (FileInfo file in Files)
+			{
+				str = str + ", " + file.Name;
+			}
+		}
 	}
 }
 
