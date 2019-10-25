@@ -60,7 +60,7 @@ namespace WpfApp1
 			{
 				string query = " Select FileNm FROM EIDS_ENC.Encounters.ExtractSummaryLog where SysBatchLogKey = @BatchLogID";
 				List<string> CSVLoad = new List<string>();
-
+				CSVLoad.Clear();
 				using (sqlConnection) {
 					SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
 
@@ -170,7 +170,14 @@ namespace WpfApp1
 					var reader = sqlCommand_Edifecs.ExecuteReader();
 
 
+					List<string> DupFiles = new List<string>();
+					CsvValidationLB.ItemsSource = DupFiles;
 
+					////////////Test 
+					while (DupFiles.Count > 0)
+					{
+						CsvValidationLB.Items.Remove(0);
+					}
 					while (reader.Read())
 					{
 
@@ -178,12 +185,14 @@ namespace WpfApp1
 						{
 
 							file.Remove(reader.GetString(0));
-				
+
+							
+							DupFiles.Add(reader.GetString(0));
 
 						}
-						List<string> DupFiles = new List<string> ();
-						DupFiles.Add(reader.GetString(0));
-						CsvValidationLB.ItemsSource = DupFiles;
+						
+
+						
 					}
 					if (file.Count > 0)
 					{
@@ -253,7 +262,7 @@ namespace WpfApp1
 			LoadCSVBTN.IsEnabled = false;
 			SearchBtn.IsEnabled = true;
 			LoadCSVFilesBTN.IsEnabled = false;
-
+			
 
 		}
 
