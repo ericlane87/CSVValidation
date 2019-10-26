@@ -46,12 +46,13 @@ namespace WpfApp1
 
 		private void SearchButton_Click(object sender, RoutedEventArgs e)
 		{
-	
+			GuideLBX.Content = "In progress............";
+			SearchBtn.IsEnabled = false;
+
 			string conectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
 
 			sqlConnection = new SqlConnection(conectionString);
 
-			MessageBoxLbl.Content = "In progress............";
 			sqlConnection.Open();
 
 
@@ -126,8 +127,9 @@ namespace WpfApp1
 
 		public void CsvFileValidation_ectracts( List<string> file)
 		{
-
 			
+			MessageBoxLbl.Content = "In Validation............";
+
 
 
 
@@ -221,11 +223,13 @@ namespace WpfApp1
 
 		}
 			public void Movefile(List<string> FileNames) {
+			MessageBoxLbl.Content = "Moving files............";
 
 			MessageBoxLbl.Content = FileNames[0];
 
 			foreach (string file in FileNames)
 			{
+
 
 				//Change to the correct enviorment
 				string FileToCopy = @"\\va01pstodfs003\Apps\eids_nonprod\FileTransfers\DEV\Archive\" + file ;
@@ -243,15 +247,21 @@ namespace WpfApp1
 			LoadCSVFilesBTN.IsEnabled = false;
 
 			SearchBtn.IsEnabled = true;
+			BatchLogTextBox.IsEnabled = true;
 
-			MessageBoxLbl.Content = "Ready for next batch 1";
-			
+			MessageBoxLbl.Content = "Ready for next batch ";
+
+
+			GuideLBX.Content = "Complete:All validated failes have been moved Edifecs";
+
+
 		}
 
 		private void LoadCSVcheckBox_Checked(object sender, RoutedEventArgs e)
 		{
 			LoadCSVBTN.IsEnabled = true;
 			SearchBtn.IsEnabled = false;
+			BatchLogTextBox.IsEnabled = false;
 			
 
 		}
@@ -262,7 +272,9 @@ namespace WpfApp1
 			LoadCSVBTN.IsEnabled = false;
 			SearchBtn.IsEnabled = true;
 			LoadCSVFilesBTN.IsEnabled = false;
-			
+			BatchLogTextBox.IsEnabled = true;
+
+
 
 		}
 
