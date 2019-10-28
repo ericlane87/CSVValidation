@@ -46,12 +46,11 @@ namespace WpfApp1
 
 		private void SearchButton_Click(object sender, RoutedEventArgs e)
 		{
-			GuideLBX.Content = "In progress............";
-			SearchBtn.IsEnabled = false;
+			
 
-			string conectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
+			string connectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
 
-			sqlConnection = new SqlConnection(conectionString);
+			sqlConnection = new SqlConnection(connectionString);
 
 			sqlConnection.Open();
 
@@ -77,6 +76,7 @@ namespace WpfApp1
 
 							CSVLoad.Add(reader_Eids.GetString(0) + ".DAT");
 
+
 						}
 
 
@@ -100,7 +100,6 @@ namespace WpfApp1
 				}
 
 			
-
 
 
 			}
@@ -175,7 +174,7 @@ namespace WpfApp1
 					List<string> DupFiles = new List<string>();
 					CsvValidationLB.ItemsSource = DupFiles;
 
-					////////////Test 
+					
 					while (DupFiles.Count > 0)
 					{
 						CsvValidationLB.Items.Remove(0);
@@ -188,13 +187,30 @@ namespace WpfApp1
 
 							file.Remove(reader.GetString(0));
 
-							
+
 							DupFiles.Add(reader.GetString(0));
 
 						}
-						
 
-						
+						//////////////////////////////////////////////
+
+						foreach (string f in file)
+						{
+
+							if (f.Contains("prod"))
+							{
+								file.Remove(f);
+
+								MessageBox.Show("The follwoing production file has been removed" + file);
+							}
+						}
+
+
+						///////////////////////////////////////////////////
+
+
+
+
 					}
 					if (file.Count > 0)
 					{
@@ -237,6 +253,7 @@ namespace WpfApp1
 				System.IO.File.Copy(FileToCopy, Destination);
 
 			}
+
 			DefaultSetting();
 
 		}
@@ -282,14 +299,171 @@ namespace WpfApp1
 		{
 
 			//Change to the correct eviroment 
-			DirectoryInfo d = new DirectoryInfo(@"D:\Test");
-			FileInfo[] Files = d.GetFiles("*.DAT"); 
-			string str = "";
+			DirectoryInfo d = new DirectoryInfo(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
+			FileInfo[] Files = d.GetFiles("*.DAT");
+			List<string> csvFileName = new List<string>();
 			foreach (FileInfo file in Files)
 			{
-				str = str + ", " + file.Name;
+				csvFileName.Add(file.Name);
+			}
+
+			CSVFilesValidation(csvFileName);
+		}
+
+
+
+		public void CSVFilesValidation(List<string> file)
+		{
+
+			try
+			{
+				string conectionString_Edifecs = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.gbdrepoConnectionString_Edifecs"].ConnectionString;
+
+
+				sqlConnection_Edifecs = new SqlConnection(conectionString_Edifecs);
+
+				sqlConnection_Edifecs.Open();
+				using (sqlConnection_Edifecs)
+				{
+					string query_Edifecs = "";
+					string query_param = "";
+					SqlCommand sqlCommand_Edifecs = new SqlCommand();
+
+
+					for (int x = 0; x < file.Count; x++)
+					{
+						if (x != file.Count - 1)
+						{
+							query_param += $"@CSVFileName{x},";
+						}
+						else
+						{
+							query_param += $"@CSVFileName{x}";
+
+						}
+						sqlCommand_Edifecs.Parameters.AddWithValue($"CSVFileName{x}", file[x]);
+
+
+
+					}
+
+					query_Edifecs = $"select transmissionfilename from rrmencounter where transmissionfilename in ({query_param})";
+					sqlCommand_Edifecs.CommandText = query_Edifecs;
+					sqlCommand_Edifecs.Connection = sqlConnection_Edifecs;
+					sqlCommand_Edifecs.CommandTimeout = 100;
+					var reader = sqlCommand_Edifecs.ExecuteReader();
+
+
+					List<string> DupFiles = new List<string>();
+					CsvValidationLB.ItemsSource = DupFiles;
+
+
+					while (DupFiles.Count > 0)
+					{
+						CsvValidationLB.Items.Remove(0);
+					}
+					while (reader.Read())
+					{
+
+						if (file.Contains(reader.GetString(0)))
+						{
+
+							file.Remove(reader.GetString(0));
+
+
+							DupFiles.Add(reader.GetString(0));
+
+						}
+
+
+
+					}
+
+
+					///////////////////////////////////////////////////////////////////////////////
+
+					foreach (string f in file)
+					{
+
+						if (f.Contains("prod"))
+						{
+							file.Remove(f);
+
+							MessageBox.Show("The follwoing production file has been removed" + file);
+						}
+					}
+					///////////////////////////////////////////////////////////////////////////////
+					if (file.Count > 0)
+					{
+
+						csvListBox.ItemsSource = file;
+						Movefile(file);
+
+					}
+					else
+					{
+						MessageBox.Show("All Files were perviously loaded.");
+
+
+						System.IO.DirectoryInfo di = new DirectoryInfo(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
+
+						foreach (FileInfo files in di.GetFiles())
+						{
+							files.Delete();
+						}
+						foreach (DirectoryInfo dir in di.GetDirectories())
+						{
+							dir.Delete(true);
+						}
+					}
+
+
+
+				}
+				sqlConnection_Edifecs.Close();
+
+				
+			}
+
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+
+			}
+
+
+			MoveFiles(file);
+		}
+
+		/////////////////////////////////////////////////////////////
+
+
+		public void MoveFiles(List<string> file)
+		{
+			foreach (string f in file)
+			{
+				string FileToCopy = @"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage\" + f;
+				String Destination = @"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\" + f;
+				System.IO.File.Copy(FileToCopy, Destination, true);
+			}
+
+
+
+			System.IO.DirectoryInfo di = new DirectoryInfo(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
+
+			foreach (FileInfo files in di.GetFiles())
+			{
+				files.Delete();
+			}
+			foreach (DirectoryInfo dir in di.GetDirectories())
+			{
+				dir.Delete(true);
 			}
 		}
+
+
+
+
 	}
 }
 
@@ -299,3 +473,4 @@ namespace WpfApp1
 
 
 	
+
