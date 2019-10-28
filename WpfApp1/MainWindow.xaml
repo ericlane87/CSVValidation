@@ -19,6 +19,7 @@
         <CheckBox x:Name="LoadCSVcheckBox" Content="Load CSV Files" HorizontalAlignment="Left" Margin="373,114,0,0" VerticalAlignment="Top" Checked="LoadCSVcheckBox_Checked" Unchecked="LoadCSVcheckBox_UnChecked"/>
         <Label x:Name="GuideLBX" Content="" HorizontalAlignment="Left" Height="59" Margin="339,214,0,0" VerticalAlignment="Top" Width="225"/>
         <Button x:Name="LoadCSVFilesBTN" Content="Load CSV" HorizontalAlignment="Left" Margin="510,142,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-1.653,0.553" IsEnabled="False"  Click="LoadCSVFilesBTN_Click"/>
+        <ProgressBar  Name="StatusBar" Value="0" HorizontalAlignment="Left" Height="17" Margin="339,26,0,0" VerticalAlignment="Top" Width="245"/>
 
 
     </Grid>

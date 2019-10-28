@@ -126,8 +126,8 @@ namespace WpfApp1
 
 		public void CsvFileValidation_ectracts( List<string> file)
 		{
-			
-			MessageBoxLbl.Content = "In Validation............";
+
+			StatusBar.Value = 25 ;
 
 
 
@@ -239,6 +239,8 @@ namespace WpfApp1
 
 		}
 			public void Movefile(List<string> FileNames) {
+
+			StatusBar.Value = 50; 
 			MessageBoxLbl.Content = "Moving files............";
 
 			MessageBoxLbl.Content = FileNames[0];
@@ -262,7 +264,8 @@ namespace WpfApp1
 		{
 			LoadCSVBTN.IsEnabled = false;
 			LoadCSVFilesBTN.IsEnabled = false;
-
+			StatusBar.Value = 0;
+			LoadCSVcheckBox.IsChecked = false;
 			SearchBtn.IsEnabled = true;
 			BatchLogTextBox.IsEnabled = true;
 
@@ -271,7 +274,7 @@ namespace WpfApp1
 
 			GuideLBX.Content = "Complete:All validated failes have been moved Edifecs";
 
-
+			StatusBar.Value = 100;
 		}
 
 		private void LoadCSVcheckBox_Checked(object sender, RoutedEventArgs e)
@@ -314,7 +317,7 @@ namespace WpfApp1
 
 		public void CSVFilesValidation(List<string> file)
 		{
-
+			StatusBar.Value = 25 ;
 			try
 			{
 				string conectionString_Edifecs = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.gbdrepoConnectionString_Edifecs"].ConnectionString;
@@ -397,7 +400,7 @@ namespace WpfApp1
 					{
 
 						csvListBox.ItemsSource = file;
-						Movefile(file);
+						MoveFiles(file);
 
 					}
 					else
@@ -432,7 +435,6 @@ namespace WpfApp1
 			}
 
 
-			MoveFiles(file);
 		}
 
 		/////////////////////////////////////////////////////////////
@@ -459,9 +461,11 @@ namespace WpfApp1
 			{
 				dir.Delete(true);
 			}
+			StatusBar.Value = 50;
+			DefaultSetting();
 		}
 
-
+		
 
 
 	}
