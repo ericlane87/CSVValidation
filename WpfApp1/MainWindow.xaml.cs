@@ -19,6 +19,8 @@ using System.Collections;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
+using System.Security.Principal;
+using System.DirectoryServices.AccountManagement;
 
 namespace WpfApp1
 {
@@ -29,24 +31,50 @@ namespace WpfApp1
 	{
 		SqlConnection sqlConnection;
 		SqlConnection sqlConnection_Edifecs;
-	
+
 
 		public MainWindow()
 		{
 
+
+
 			InitializeComponent();
-			
 
 
+	
+
+
+				StatusBar.Minimum = 0;
+			StatusBar.Maximum = 100;
+			StatusBar.Value = 0;
 
 
 		}
 
 
 
+
+
+
 		private void SearchButton_Click(object sender, RoutedEventArgs e)
 		{
-			
+
+
+			ClearStatusBar();
+
+			List<string> BatchLodID = new List<string>();
+
+			BatchLodID.Add(BatchLogTextBox.Text);
+
+
+			BatchlogListBox.ItemsSource = BatchLodID;
+
+
+			BatchLodID.Add(BatchLogTextBox.Text);
+
+
+
+
 
 			string connectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
 
@@ -69,21 +97,21 @@ namespace WpfApp1
 
 					var reader_Eids = sqlCommand.ExecuteReader();
 
-				
-
-						while (reader_Eids.Read())
-						{
-
-							CSVLoad.Add(reader_Eids.GetString(0) + ".DAT");
 
 
-						}
+					while (reader_Eids.Read())
+					{
 
-
-					
+						CSVLoad.Add(reader_Eids.GetString(0) + ".DAT");
 
 
 					}
+
+
+
+
+
+				}
 
 				sqlConnection.Close();
 				if (CSVLoad.Count.Equals(0))
@@ -99,7 +127,7 @@ namespace WpfApp1
 
 				}
 
-			
+
 
 
 			}
@@ -116,6 +144,7 @@ namespace WpfApp1
 
 		private void CSVStage_click(object sender, RoutedEventArgs e)
 		{
+			StatusBar.Value = 0;
 
 
 			Process.Start(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
@@ -124,10 +153,13 @@ namespace WpfApp1
 
 
 
-		public void CsvFileValidation_ectracts( List<string> file)
+		public void CsvFileValidation_ectracts(List<string> file)
 		{
 
-			StatusBar.Value = 25 ;
+			string Date = string.Format("{0:HH:mm:ss tt}", DateTime.Now);
+
+
+			StatusBar.Value = 25;
 
 
 
@@ -174,7 +206,7 @@ namespace WpfApp1
 					List<string> DupFiles = new List<string>();
 					CsvValidationLB.ItemsSource = DupFiles;
 
-					
+
 					while (DupFiles.Count > 0)
 					{
 						CsvValidationLB.Items.Remove(0);
@@ -238,43 +270,56 @@ namespace WpfApp1
 
 
 		}
-			public void Movefile(List<string> FileNames) {
+		public void Movefile(List<string> FileNames) {
 
-			StatusBar.Value = 50; 
+			StatusBar.Value = 50;
 			MessageBoxLbl.Content = "Moving files............";
 
 			MessageBoxLbl.Content = FileNames[0];
+			string Date = string.Format("{0:HH:mm:ss tt}", DateTime.Now);
 
 			foreach (string file in FileNames)
 			{
 
 
 				//Change to the correct enviorment
-				string FileToCopy = @"\\va01pstodfs003\Apps\eids_nonprod\FileTransfers\DEV\Archive\" + file ;
-				String Destination = @"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\" +file;
-				System.IO.File.Copy(FileToCopy, Destination);
+				string FileToCopy = @"\\va01pstodfs003\Apps\eids_nonprod\FileTransfers\DEV\Archive\" + file;
+				String Destination = @"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\" + file;
+				System.IO.File.Copy(FileToCopy, Destination, true);
 
 			}
+
+			CompleteStatus();
+
+		}
+	
+		public void CompleteStatus()
+		{
+			GuideLBX.Content = "Complete:All validated files have been moved to Edifecs";
+			StatusBar.Value = 100;
+
+			MessageBoxLbl.Content = "Ready for next batch ";
+			
+			
 
 			DefaultSetting();
 
 		}
 
-		public void DefaultSetting()
+
+			public void DefaultSetting()
 		{
+
+			
 			LoadCSVBTN.IsEnabled = false;
 			LoadCSVFilesBTN.IsEnabled = false;
-			StatusBar.Value = 0;
 			LoadCSVcheckBox.IsChecked = false;
 			SearchBtn.IsEnabled = true;
 			BatchLogTextBox.IsEnabled = true;
 
-			MessageBoxLbl.Content = "Ready for next batch ";
+			
 
-
-			GuideLBX.Content = "Complete:All validated failes have been moved Edifecs";
-
-			StatusBar.Value = 100;
+			
 		}
 
 		private void LoadCSVcheckBox_Checked(object sender, RoutedEventArgs e)
@@ -286,6 +331,10 @@ namespace WpfApp1
 
 		}
 
+	   private void ClearStatusBar()
+		{
+			StatusBar.Value = 0;
+		}
 
 		private void LoadCSVcheckBox_UnChecked(object sender, RoutedEventArgs e)
 		{
@@ -462,7 +511,7 @@ namespace WpfApp1
 				dir.Delete(true);
 			}
 			StatusBar.Value = 50;
-			DefaultSetting();
+			CompleteStatus();
 		}
 
 		
