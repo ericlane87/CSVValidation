@@ -44,9 +44,9 @@ namespace WpfApp1
 	
 
 
-				StatusBar.Minimum = 0;
-			StatusBar.Maximum = 100;
-			StatusBar.Value = 0;
+				//StatusBar.Minimum = 0;
+			//StatusBar.Maximum = 100;
+			//StatusBar.Value = 0;
 
 
 		}
@@ -60,7 +60,7 @@ namespace WpfApp1
 		{
 
 
-			ClearStatusBar();
+			StatusBar.IsIndeterminate = true;
 
 			List<string> BatchLodID = new List<string>();
 
@@ -72,6 +72,7 @@ namespace WpfApp1
 
 			BatchLodID.Add(BatchLogTextBox.Text);
 
+			//StatusBar.Value = 10;
 
 
 
@@ -123,7 +124,7 @@ namespace WpfApp1
 				{
 
 					csvListBox.ItemsSource = CSVLoad;
-					CsvFileValidation_ectracts(CSVLoad);
+					CsvFileValidation_extracts(CSVLoad);
 
 				}
 
@@ -144,7 +145,7 @@ namespace WpfApp1
 
 		private void CSVStage_click(object sender, RoutedEventArgs e)
 		{
-			StatusBar.Value = 0;
+			//StatusBar.Value = 0;
 
 
 			Process.Start(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
@@ -153,13 +154,13 @@ namespace WpfApp1
 
 
 
-		public void CsvFileValidation_ectracts(List<string> file)
+		public void CsvFileValidation_extracts(List<string> file)
 		{
 
 			string Date = string.Format("{0:HH:mm:ss tt}", DateTime.Now);
 
 
-			StatusBar.Value = 25;
+			//StatusBar.Value = 25;
 
 
 
@@ -229,7 +230,7 @@ namespace WpfApp1
 						foreach (string f in file)
 						{
 
-							if (f.Contains("prod"))
+							if (f.Contains("PROD"))
 							{
 								file.Remove(f);
 
@@ -272,7 +273,7 @@ namespace WpfApp1
 		}
 		public void Movefile(List<string> FileNames) {
 
-			StatusBar.Value = 50;
+			//StatusBar.Value = 50;
 			MessageBoxLbl.Content = "Moving files............";
 
 			MessageBoxLbl.Content = FileNames[0];
@@ -296,7 +297,8 @@ namespace WpfApp1
 		public void CompleteStatus()
 		{
 			GuideLBX.Content = "Complete:All validated files have been moved to Edifecs";
-			StatusBar.Value = 100;
+			StatusBar.IsIndeterminate = true;
+
 
 			MessageBoxLbl.Content = "Ready for next batch ";
 			
@@ -316,10 +318,11 @@ namespace WpfApp1
 			LoadCSVcheckBox.IsChecked = false;
 			SearchBtn.IsEnabled = true;
 			BatchLogTextBox.IsEnabled = true;
+			StatusBar.IsIndeterminate = false;
 
-			
 
-			
+
+
 		}
 
 		private void LoadCSVcheckBox_Checked(object sender, RoutedEventArgs e)
@@ -331,10 +334,7 @@ namespace WpfApp1
 
 		}
 
-	   private void ClearStatusBar()
-		{
-			StatusBar.Value = 0;
-		}
+	  
 
 		private void LoadCSVcheckBox_UnChecked(object sender, RoutedEventArgs e)
 		{
@@ -366,7 +366,7 @@ namespace WpfApp1
 
 		public void CSVFilesValidation(List<string> file)
 		{
-			StatusBar.Value = 25 ;
+			//StatusBar.Value = 25 ;
 			try
 			{
 				string conectionString_Edifecs = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.gbdrepoConnectionString_Edifecs"].ConnectionString;
@@ -437,7 +437,7 @@ namespace WpfApp1
 					foreach (string f in file)
 					{
 
-						if (f.Contains("prod"))
+						if (f.Contains("PROD"))
 						{
 							file.Remove(f);
 
@@ -510,7 +510,7 @@ namespace WpfApp1
 			{
 				dir.Delete(true);
 			}
-			StatusBar.Value = 50;
+			//StatusBar.Value = 50;
 			CompleteStatus();
 		}
 
