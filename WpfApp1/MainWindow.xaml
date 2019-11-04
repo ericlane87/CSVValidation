@@ -1,33 +1,72 @@
-﻿<Window 
-    
-    x:Class="WpfApp1.MainWindow"
-    
+﻿<Window x:Class="WpfApp1.MainWindow" Background="Gray" ResizeMode="CanMinimize" 
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApp1"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="OSCAR" Height="550" Width="600">
 
-    <Grid Background="Azure" RenderTransformOrigin="0.569,0.799" Margin="2,0,-2,0">
-        <TextBox x:Name="BatchLogTextBox" HorizontalAlignment="Left" Height="23" Margin="338,65,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="163"/>
-        <Button x:Name="SearchBtn" Content="Load CSV" HorizontalAlignment="Left" Margin="503,67,0,0" VerticalAlignment="Top" Width="75" Click="SearchButton_Click" RenderTransformOrigin="-1.653,0.553"/>
-        <ListBox x:Name="csvListBox" HorizontalAlignment="Left" Height="58" Margin="10,119,0,0" VerticalAlignment="Top" Width="223"  />
-        <Button x:Name="LoadCSVBTN" Content="Stage" HorizontalAlignment="Left" Margin="504,109,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-1.653,0.553" IsEnabled="False"  Click="CSVStage_click"/>
-        <Label x:Name="label" Content="BATCHLOG ID " HorizontalAlignment="Left" Margin="251,64,0,0" VerticalAlignment="Top" Height="37" Width="83"/>
-        <Label x:Name="MessageBoxLbl" Content="Ready for Next Batch" HorizontalAlignment="Left" Margin="373,390,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.404,-1.514" Width="409" Height="25"/>
-        <ListBox x:Name="CsvValidationLB" HorizontalAlignment="Left" Height="65" Margin="10,245,0,0" VerticalAlignment="Top" Width="223"/>
-        <Label x:Name="label1" Content="Removed CSV" HorizontalAlignment="Left" Margin="88,214,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="label2" Content="CSV Load" HorizontalAlignment="Left" Margin="100,91,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="LoadCSVcheckBox" Content="Load CSV Files" HorizontalAlignment="Left" Margin="367,114,0,0" VerticalAlignment="Top" Checked="LoadCSVcheckBox_Checked" Unchecked="LoadCSVcheckBox_UnChecked"/>
-        <Label x:Name="GuideLBX" Content="" HorizontalAlignment="Left" Height="59" Margin="301,214,0,0" VerticalAlignment="Top" Width="291"/>
-        <Button x:Name="LoadCSVFilesBTN" Content="Load CSV" HorizontalAlignment="Left" Margin="504,142,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-1.653,0.553" IsEnabled="False"  Click="LoadCSVFilesBTN_Click"/>
-        <ProgressBar  Name="StatusBar" IsIndeterminate="False" HorizontalAlignment="Left" Height="17" Margin="333,26,0,0" VerticalAlignment="Top" Width="245"/>
-        <ListBox x:Name="BatchlogListBox" HorizontalAlignment="Left" Height="146" Margin="610,47,0,0" VerticalAlignment="Top" Width="96"/>
-        <Label x:Name="label3" Content="Label" HorizontalAlignment="Left" Height="0" Margin="423,240,0,0" VerticalAlignment="Top" Width="4"/>
+    <Grid>
+
+        <TabControl Background="White" Margin="10,0,10,10">
+            <TabItem Header="Batch Log">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="15*"/>
+                        <ColumnDefinition Width="46*"/>
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Name="StatusBar" Margin="0,10,14,446" HorizontalAlignment="Right" Width="133" Grid.Column="1"></ProgressBar>
+                    <TextBox Name="BatchLogTextBox" Text=""  Margin="14,12,368,444"  Grid.ColumnSpan="2">
 
 
+                        <TextBox.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="12"/>
+                            </Style>
+                        </TextBox.Resources>
 
+                    </TextBox>
+
+                    <ComboBox Name="ValidationCB" Margin="226,422,96,32" IsEnabled="False" Grid.Column="1">
+                        <ComboBoxItem>ALL CSV from all Enviorments</ComboBoxItem>
+                        <ComboBoxItem >Allow Duplicates</ComboBoxItem>
+                    </ComboBox>
+
+                    <ListBox  Margin="14,50,6,60" Name="csvListBox" Grid.ColumnSpan="2"></ListBox>
+                    <Button Content="Load CSV" Margin="357,422,0,27" HorizontalAlignment="Left" Width="60" Click="SearchButton_Click" Grid.Column="1" RenderTransformOrigin="1.5,0.594"/>
+                    <CheckBox Grid.Column="1" Margin="194,427,207,32" Unchecked="CheckBox_Unchecked" Checked="CheckBox_Checked"></CheckBox>
+
+                </Grid>
+
+
+            </TabItem>
+
+
+            <TabItem Header="CSV Files" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="12*"/>
+                        <ColumnDefinition Width="8*"/>
+                        <ColumnDefinition Width="163*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Margin="10,10,427,437" RenderTransformOrigin="-0.417,0.903" Content="Stage Files" Click="CSVStage_click" Grid.ColumnSpan="3"/>
+                    <ProgressBar Name="StatusBar2" Margin="0,10,14,446" HorizontalAlignment="Right" Width="133" Grid.Column="2"></ProgressBar>
+
+                    <ListBox Margin="10,51,10,45" Name="csvListBox2" Grid.ColumnSpan="3"></ListBox>
+                    <CheckBox Grid.Column="2" Margin="259,445,229,24" RenderTransformOrigin="1.733,3.615"></CheckBox>
+                    <ComboBox Name="ValidationCB2" Margin="294,443,110,24" IsEnabled="False" Grid.Column="2" Text="Please slecet">
+                        <ComboBoxItem>ALL CSV from all Enviorments</ComboBoxItem>
+                        <ComboBoxItem >Allow Duplicates</ComboBoxItem>
+                        <ComboBoxItem IsSelected="True">Please Select One</ComboBoxItem>
+
+                    </ComboBox>
+
+
+                    <Button Name="LoadCSVFiles" IsEnabled="False" Content="Load CSV" Margin="432,440,0,13" HorizontalAlignment="Left" Width="60" Click="LoadCSVFilesBTN_Click" Grid.Column="2"/>
+
+                </Grid>
+
+            </TabItem>
+
+            <TabItem Header="Tab3" />
+        </TabControl>
     </Grid>
 </Window>
+

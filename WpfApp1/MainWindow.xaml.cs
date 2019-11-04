@@ -41,10 +41,9 @@ namespace WpfApp1
 			InitializeComponent();
 
 
-	
 
 
-				//StatusBar.Minimum = 0;
+			//StatusBar.Minimum = 0;
 			//StatusBar.Maximum = 100;
 			//StatusBar.Value = 0;
 
@@ -62,20 +61,6 @@ namespace WpfApp1
 
 			StatusBar.IsIndeterminate = true;
 
-			List<string> BatchLodID = new List<string>();
-
-			BatchLodID.Add(BatchLogTextBox.Text);
-
-
-			BatchlogListBox.ItemsSource = BatchLodID;
-
-
-			BatchLodID.Add(BatchLogTextBox.Text);
-
-			//StatusBar.Value = 10;
-
-
-
 
 			string connectionString = ConfigurationManager.ConnectionStrings["WpfApp1.Properties.Settings.masterConnectionString1"].ConnectionString;
 
@@ -90,7 +75,8 @@ namespace WpfApp1
 				string query = " Select FileNm FROM EIDS_ENC.Encounters.ExtractSummaryLog where SysBatchLogKey = @BatchLogID";
 				List<string> CSVLoad = new List<string>();
 				CSVLoad.Clear();
-				using (sqlConnection) {
+				using (sqlConnection)
+				{
 					SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
 
 					sqlCommand.Parameters.AddWithValue("@BatchLogID", BatchLogTextBox.Text);
@@ -115,16 +101,29 @@ namespace WpfApp1
 				}
 
 				sqlConnection.Close();
+
+
+
 				if (CSVLoad.Count.Equals(0))
 				{
 					MessageBox.Show("CSV files not found.Check batchlog ID");
-					MessageBoxLbl.Content = "File not found";
 				}
 				else
 				{
+				
+					if(ValidationCB.Text == "Allow Duplicates")
+					{
+						 CSVLoad = EnviorentValidation(CSVLoad);
+						csvListBox.ItemsSource = CSVLoad;
 
-					csvListBox.ItemsSource = CSVLoad;
-					CsvFileValidation_extracts(CSVLoad);
+						Movefile(CSVLoad);
+					}
+					else
+					{
+						csvListBox.ItemsSource = CSVLoad;
+						CsvFileValidation_extracts(CSVLoad);
+					}
+						
 
 				}
 
@@ -149,7 +148,7 @@ namespace WpfApp1
 
 
 			Process.Start(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
-			LoadCSVFilesBTN.IsEnabled = true;
+			LoadCSVFiles.IsEnabled = true;
 		}
 
 
@@ -157,7 +156,7 @@ namespace WpfApp1
 		public void CsvFileValidation_extracts(List<string> file)
 		{
 
-			string Date = string.Format("{0:HH:mm:ss tt}", DateTime.Now);
+			//string Date = string.Format("{0:HH:mm:ss tt}", DateTime.Now);
 
 
 			//StatusBar.Value = 25;
@@ -205,13 +204,13 @@ namespace WpfApp1
 
 
 					List<string> DupFiles = new List<string>();
-					CsvValidationLB.ItemsSource = DupFiles;
+					//CsvValidationLB.ItemsSource = DupFiles;
 
 
-					while (DupFiles.Count > 0)
-					{
-						CsvValidationLB.Items.Remove(0);
-					}
+					//while (DupFiles.Count > 0)
+					//{
+					//	CsvValidationLB.Items.Remove(0);
+					//}
 					while (reader.Read())
 					{
 
@@ -225,21 +224,11 @@ namespace WpfApp1
 
 						}
 
-						//////////////////////////////////////////////
-
-						foreach (string f in file)
+						if (ValidationCB.Text != "Allow CSV from all Enviorments")
 						{
-
-							if (f.Contains("PROD"))
-							{
-								file.Remove(f);
-
-								MessageBox.Show("The follwoing production file has been removed" + file);
-							}
+							file = EnviorentValidation(file);
 						}
-
-
-						///////////////////////////////////////////////////
+						
 
 
 
@@ -271,12 +260,11 @@ namespace WpfApp1
 
 
 		}
-		public void Movefile(List<string> FileNames) {
+		public void Movefile(List<string> FileNames)
+		{
 
-			//StatusBar.Value = 50;
-			MessageBoxLbl.Content = "Moving files............";
-
-			MessageBoxLbl.Content = FileNames[0];
+			
+			
 			string Date = string.Format("{0:HH:mm:ss tt}", DateTime.Now);
 
 			foreach (string file in FileNames)
@@ -293,30 +281,27 @@ namespace WpfApp1
 			CompleteStatus();
 
 		}
-	
+
 		public void CompleteStatus()
 		{
-			GuideLBX.Content = "Complete:All validated files have been moved to Edifecs";
+			
 			StatusBar.IsIndeterminate = true;
 
 
-			MessageBoxLbl.Content = "Ready for next batch ";
-			
-			
+		
+
+
 
 			DefaultSetting();
 
 		}
 
 
-			public void DefaultSetting()
+		public void DefaultSetting()
 		{
 
+
 			
-			LoadCSVBTN.IsEnabled = false;
-			LoadCSVFilesBTN.IsEnabled = false;
-			LoadCSVcheckBox.IsChecked = false;
-			SearchBtn.IsEnabled = true;
 			BatchLogTextBox.IsEnabled = true;
 			StatusBar.IsIndeterminate = false;
 
@@ -325,31 +310,9 @@ namespace WpfApp1
 
 		}
 
-		private void LoadCSVcheckBox_Checked(object sender, RoutedEventArgs e)
-		{
-			LoadCSVBTN.IsEnabled = true;
-			SearchBtn.IsEnabled = false;
-			BatchLogTextBox.IsEnabled = false;
-			
-
-		}
-
-	  
-
-		private void LoadCSVcheckBox_UnChecked(object sender, RoutedEventArgs e)
-		{
-			LoadCSVBTN.IsEnabled = false;
-			SearchBtn.IsEnabled = true;
-			LoadCSVFilesBTN.IsEnabled = false;
-			BatchLogTextBox.IsEnabled = true;
-
-
-
-		}
-
+		
 		private void LoadCSVFilesBTN_Click(object sender, RoutedEventArgs e)
 		{
-
 			//Change to the correct eviroment 
 			DirectoryInfo d = new DirectoryInfo(@"\\va01pstodfs003.corp.agp.ads\files\VA1\Private\ITS-TechServices\AMS\EnterpriseSvcs\Encounters\AF32634\Stage");
 			FileInfo[] Files = d.GetFiles("*.DAT");
@@ -357,9 +320,30 @@ namespace WpfApp1
 			foreach (FileInfo file in Files)
 			{
 				csvFileName.Add(file.Name);
+				
 			}
 
-			CSVFilesValidation(csvFileName);
+			csvListBox2.ItemsSource = csvFileName;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+			if (csvFileName.Count == 0)
+			{
+				DefaultSetting();
+				
+			}
+
+			if(ValidationCB2.Text== "Allow Duplicates")
+			{
+			csvFileName=EnviorentValidation(csvFileName);
+				MoveFiles(csvFileName);
+
+
+			}
+			else
+			{
+				CSVFilesValidation(csvFileName);
+
+			}
+			
 		}
 
 
@@ -407,13 +391,13 @@ namespace WpfApp1
 
 
 					List<string> DupFiles = new List<string>();
-					CsvValidationLB.ItemsSource = DupFiles;
+					//CsvValidationLB.ItemsSource = DupFiles;
 
 
-					while (DupFiles.Count > 0)
-					{
-						CsvValidationLB.Items.Remove(0);
-					}
+					//while (DupFiles.Count > 0)
+					//{
+					//	CsvValidationLB.Items.Remove(0);
+					//}
 					while (reader.Read())
 					{
 
@@ -433,17 +417,21 @@ namespace WpfApp1
 
 
 					///////////////////////////////////////////////////////////////////////////////
-
-					foreach (string f in file)
+					if(ValidationCB2.Text != "Allow CSV from all Enviorments")
 					{
-
-						if (f.Contains("PROD"))
+						foreach (string f in file)
 						{
-							file.Remove(f);
 
-							MessageBox.Show("The follwoing production file has been removed" + file);
+							if (f.Contains("PROD"))
+							{
+								file.Remove(f);
+
+								MessageBox.Show("The follwoing production file has been removed" + file);
+							}
 						}
+
 					}
+				
 					///////////////////////////////////////////////////////////////////////////////
 					if (file.Count > 0)
 					{
@@ -474,7 +462,7 @@ namespace WpfApp1
 				}
 				sqlConnection_Edifecs.Close();
 
-				
+
 			}
 
 			catch (Exception ex)
@@ -514,16 +502,42 @@ namespace WpfApp1
 			CompleteStatus();
 		}
 
-		
 
 
+		public List<string> EnviorentValidation(List<string> file)
+		{
+
+			foreach (string f in file)
+			{
+
+				if (f.Contains("PROD"))
+				{
+					file.Remove(f);
+
+					MessageBox.Show("The follwoing production file has been removed" + file);
+				}
+			}
+
+			return file;
+		}
+
+		private void CheckBox_Checked(object sender, RoutedEventArgs e)
+		{
+			ValidationCB.IsEnabled = true;
+		}
+
+		private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+		{
+			ValidationCB.IsEnabled = false;
+			ValidationCB.Text = "Please Select";
+		}
 	}
+
 }
 
 
-			
 
 
 
-	
+
 
